@@ -18,8 +18,11 @@ router.post('/donate/:ngoId', protect, upload.single('foodPhoto'), createDonatio
 router.get('/requests', protect, getDonationsForNgo);
 router.patch('/donations/:donationId/status', protect, updateDonationStatus);
 router.get('/mydonations', protect, getMyDonations);
+router.delete('/donate/:donationId', protect, deleteDonation);
 
 router.post('/donate', protect, upload.single('foodPhoto'), autoAssignDonation);
+
+
 
 
 export default router;

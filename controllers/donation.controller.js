@@ -210,3 +210,36 @@ export const getMyDonations = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+<<<<<<< HEAD
+=======
+// DELETE /api/v1/donate/:donationId
+export const deleteDonation = async (req, res) => {
+  console.log("DELETE route called");
+  console.log("Donation ID:", req.params.donationId);
+  console.log("User ID from token:", req.user.id);
+
+
+  try {
+    const donationId = req.params.donationId;
+
+    const donation = await Donation.findById(donationId);
+
+    if (!donation) {
+      return res.status(404).json({ message: 'Donation not found' });
+    }
+
+    // Check if the logged-in user is the owner
+    if (donation.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to delete this donation' });
+    }
+
+    await donation.remove();
+
+    res.status(200).json({ message: 'Donation deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting donation:', err.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+>>>>>>> c89f611 (files)
