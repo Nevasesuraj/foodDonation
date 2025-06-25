@@ -1,31 +1,28 @@
+
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: ['user', 'ngo'],
-    default: 'user',
-  },
-  // 👇 Password reset fields
-  resetToken: {
-    type: String,
-  },
-  resetTokenExpiry: {
-    type: Date,
-  },
-});
+  name: String,
+  email: String,
+  password: String,
+  role: { type: String, enum: ['user', 'ngo'], default: 'user' },
+  profilePhoto: String,
 
-export default mongoose.model('User', userSchema);
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number], 
+    }
+  },
+  address: String,
+},
+{
+  timestamps: true,
+});
+userSchema.index({ location: '2dsphere' });
+const User = mongoose.model('User', userSchema);
+export default User;
