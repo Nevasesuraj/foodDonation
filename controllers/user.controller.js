@@ -6,29 +6,26 @@ import { sendResetPasswordEmail } from '../utilities/mailer.js';
 
 // Forgot Password Controller
 export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) return res.status(400).json({ message: 'Email is required' });
-
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const { email } = req.body;
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 mins
+    const user = await User.findOne({ email }); // ✅ await
 
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = resetTokenExpiry;
-    await user.save();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-    const resetLink = `https://your-frontend-url.com/reset-password?token=${resetToken}&email=${email}`;
+    const otp = generateOTP();
+    user.resetOTP = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+    await user.save(); // ✅ await
 
-    await sendResetPasswordEmail(email, resetLink);
+    await sendVerificationEmail(email, otp); // ✅ await
 
-    res.status(200).json({ message: 'Reset link sent to your email.' });
-  } catch (err) {
-    console.error('Forgot Password Error:', err);
-    res.status(500).json({ message: 'Something went wrong.' });
+    res.status(200).json({ message: 'OTP sent to your email' }); // ✅ send response
+  } catch (error) {
+    console.error('Forgot Password Error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 

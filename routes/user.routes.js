@@ -9,6 +9,8 @@ import {
   forgotPassword,     // 👈 new import
   resetPassword       // 👈 new import
 } from '../controllers/user.controller.js';
+import { sendOtp, verifyOtp } from '../controllers/otp.controller.js';
+
 
 import { protect } from '../middlewares/authprotect.js';
 import upload from '../middlewares/upload.middleware.js';
@@ -29,9 +31,8 @@ router.post('/logout', logoutUser);
 router.get('/getuser', protect, getCurrentUser);
 
 // 🟢 Forgot Password Routes (NEW)
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
-
+router.post('/forgot-password', sendOtp);     // ✅ Send OTP to email
+router.post('/verify-otp', verifyOtp);        // ✅ Verify OTP entered by user
 // 🟢 Admin Routes
 router.get('/users', protect, getAllUsers);
 router.get('/ngos', protect, getAllngos);
