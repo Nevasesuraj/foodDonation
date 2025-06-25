@@ -191,55 +191,40 @@ export const updateDonationStatus = async (req, res) => {
 // GET /api/v1/donations/mydonations
 export const getMyDonations = async (req, res) => {
   try {
-    const userId = req.user.id; // fetched from token via 'protect' middleware
-
+    // Check role
     if (req.user.role !== 'user') {
-      return res.status(403).json({ message: 'Access denied: Only donors (users) can view their donations.' });
+      return res.status(403).json({ message: 'Only users can access their donations.' });
     }
 
-    const donations = await Donation.find({ user: userId })
-      .populate('ngo', 'name email') // populate NGO details (optional)
-      .sort({ createdAt: -1 }); // show latest donations first
+    const donations = await Donation.find({ user: req.user.id })
+      .populate('ngo', 'name')
+      .sort({ createdAt: -1 });
 
-    res.json({
-      message: 'Fetched user donations successfully',
-      donations,
-    });
-  } catch (err) {
-    console.error('Error fetching user donations:', err);
-    res.status(500).json({ message: 'Internal server error.' });
+    res.status(200).json({ donations });
+  } catch (error) {
+    console.error("Error in getMyDonations:", error);
+    res.status(500).json({ message: "Server error while fetching donations." });
   }
 };
-<<<<<<< HEAD
-=======
+
 // DELETE /api/v1/donate/:donationId
 export const deleteDonation = async (req, res) => {
-  console.log("DELETE route called");
-  console.log("Donation ID:", req.params.donationId);
-  console.log("User ID from token:", req.user.id);
-
-
   try {
-    const donationId = req.params.donationId;
-
-    const donation = await Donation.findById(donationId);
+    const donation = await Donation.findById(req.params.id);
 
     if (!donation) {
-      return res.status(404).json({ message: 'Donation not found' });
+      return res.status(404).json({ message: "Donation not found." });
     }
 
-    // Check if the logged-in user is the owner
+    // Only allow the owner to delete
     if (donation.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Not authorized to delete this donation' });
+      return res.status(403).json({ message: "Not authorized to delete this donation." });
     }
 
-    await donation.remove();
-
-    res.status(200).json({ message: 'Donation deleted successfully' });
-  } catch (err) {
-    console.error('Error deleting donation:', err.message);
-    res.status(500).json({ message: 'Internal server error' });
+    await donation.deleteOne();
+    res.status(200).json({ message: "Donation deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting donation:", error);
+    res.status(500).json({ message: "Server error." });
   }
 };
-
->>>>>>> c89f611 (files)

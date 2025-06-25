@@ -29,3 +29,9 @@ connectDB();
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
+
+app._router.stack.forEach((r) => {
+  if (r.route && r.route.path) {
+    console.log(r.route.path);
+  }
+});
