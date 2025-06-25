@@ -191,40 +191,22 @@ export const updateDonationStatus = async (req, res) => {
 // GET /api/v1/donations/mydonations
 export const getMyDonations = async (req, res) => {
   try {
-    // Check role
+    const userId = req.user.id; // fetched from token via 'protect' middleware
+
     if (req.user.role !== 'user') {
-      return res.status(403).json({ message: 'Only users can access their donations.' });
+      return res.status(403).json({ message: 'Access denied: Only donors (users) can view their donations.' });
     }
 
-    const donations = await Donation.find({ user: req.user.id })
-      .populate('ngo', 'name')
-      .sort({ createdAt: -1 });
+    const donations = await Donation.find({ user: userId })
+      .populate('ngo', 'name email') // populate NGO details (optional)
+      .sort({ createdAt: -1 }); // show latest donations first
 
-    res.status(200).json({ donations });
-  } catch (error) {
-    console.error("Error in getMyDonations:", error);
-    res.status(500).json({ message: "Server error while fetching donations." });
-  }
-};
-
-// DELETE /api/v1/donate/:donationId
-export const deleteDonation = async (req, res) => {
-  try {
-    const donation = await Donation.findById(req.params.id);
-
-    if (!donation) {
-      return res.status(404).json({ message: "Donation not found." });
-    }
-
-    // Only allow the owner to delete
-    if (donation.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized to delete this donation." });
-    }
-
-    await donation.deleteOne();
-    res.status(200).json({ message: "Donation deleted successfully." });
-  } catch (error) {
-    console.error("Error deleting donation:", error);
-    res.status(500).json({ message: "Server error." });
+    res.json({
+      message: 'Fetched user donations successfully',
+      donations,
+    });
+  } catch (err) {
+    console.error('Error fetching user donations:', err);
+    res.status(500).json({ message: 'Internal server error.' });
   }
 };

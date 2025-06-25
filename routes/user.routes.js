@@ -3,7 +3,7 @@ import { registerUser, loginUser, logoutUser, getCurrentUser,getAllngos,getAllUs
 import { protect } from '../middlewares/authprotect.js';
 import upload from '../middlewares/upload.middleware.js';
 import { createDonation, autoAssignDonation, getDonationsForNgo,updateDonationStatus, getMyDonations } from '../controllers/donation.controller.js';
-import {  deleteDonation } from '../controllers/donation.controller.js';
+
 const router = express.Router();
 
 router.post('/register', upload.single('profilePhoto'), registerUser);
@@ -18,11 +18,8 @@ router.post('/donate/:ngoId', protect, upload.single('foodPhoto'), createDonatio
 router.get('/requests', protect, getDonationsForNgo);
 router.patch('/donations/:donationId/status', protect, updateDonationStatus);
 router.get('/mydonations', protect, getMyDonations);
-router.delete('/donate/:donationId', protect, deleteDonation);
 
 router.post('/donate', protect, upload.single('foodPhoto'), autoAssignDonation);
-
-
 
 
 export default router;
