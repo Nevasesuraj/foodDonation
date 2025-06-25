@@ -1,11 +1,14 @@
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+
 export const protect = (req, res, next) => {
   try {
-    console.log('Cookies:', req.cookies); // see all cookies
-    const token = req.cookies.token;
-    console.log('Token from cookie:', token);
+    // Support both token from cookies and Authorization header
+    const token =
+      req.cookies.token || req.headers.authorization?.split(' ')[1];
+
+    console.log('Token used for auth:', token);
 
     if (!token) {
       return res.status(401).json({ message: 'No token, authorization denied' });
@@ -16,7 +19,7 @@ export const protect = (req, res, next) => {
 
     req.user = {
       id: decoded.userId,
-      role: decoded.role || 'user'
+      role: decoded.role || 'user',
     };
 
     next();
